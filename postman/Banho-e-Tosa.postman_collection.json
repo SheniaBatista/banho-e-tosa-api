@@ -1,0 +1,42 @@
+{
+  "info": {
+    "name": "Banho & Tosa API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"}
+  ],
+  "item": [
+    {
+      "name": "Cadastrar cliente",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Ana Souza\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"ana@email.com\"\n}"},
+        "url": "{{baseUrl}}/clientes"
+      }
+    },
+    {
+      "name": "Cadastrar pet",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Thor\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Shih-tzu\",\n  \"pesoKg\": 7.5,\n  \"clienteId\": 1\n}"},
+        "url": "{{baseUrl}}/pets"
+      }
+    },
+    {
+      "name": "Criar agendamento",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"clienteId\": 1,\n  \"petId\": 1,\n  \"tipoServico\": \"BANHO_E_TOSA\",\n  \"dataHora\": \"2027-01-20T14:00:00\"\n}"},
+        "url": "{{baseUrl}}/agendamentos"
+      }
+    },
+    {
+      "name": "Listar agendamentos",
+      "request": {"method": "GET", "url": "{{baseUrl}}/agendamentos"}
+    }
+  ]
+}
