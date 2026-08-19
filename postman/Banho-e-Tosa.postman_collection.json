@@ -1,42 +1,179 @@
 {
   "info": {
     "name": "Banho & Tosa API",
+    "description": "Coleção completa da API de gestão de clientes, pets e agendamentos.\n\nFluxo sugerido: Clientes > Cadastrar cliente, Pets > Cadastrar pet, Agendamentos > Criar agendamento, e por fim concluir ou cancelar.\n\nOs ids retornados nas primeiras requisições alimentam automaticamente as variáveis clienteId, petId e agendamentoId.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {"key": "baseUrl", "value": "http://localhost:8080"}
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "clienteId", "value": "1"},
+    {"key": "petId", "value": "1"},
+    {"key": "agendamentoId", "value": "1"}
   ],
   "item": [
     {
-      "name": "Cadastrar cliente",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Ana Souza\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"ana@email.com\"\n}"},
-        "url": "{{baseUrl}}/clientes"
-      }
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Cadastrar cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('devolve 201', () => pm.response.to.have.status(201));",
+                  "const corpo = pm.response.json();",
+                  "pm.collectionVariables.set('clienteId', corpo.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Ana Souza\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"ana@email.com\"\n}"},
+            "url": "{{baseUrl}}/clientes"
+          }
+        },
+        {
+          "name": "Listar clientes",
+          "request": {"method": "GET", "url": "{{baseUrl}}/clientes"}
+        },
+        {
+          "name": "Cadastrar cliente (e-mail invalido - 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('devolve 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Ana Souza\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"nao-e-um-email\"\n}"},
+            "url": "{{baseUrl}}/clientes"
+          }
+        }
+      ]
     },
     {
-      "name": "Cadastrar pet",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Thor\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Shih-tzu\",\n  \"pesoKg\": 7.5,\n  \"clienteId\": 1\n}"},
-        "url": "{{baseUrl}}/pets"
-      }
+      "name": "Pets",
+      "item": [
+        {
+          "name": "Cadastrar pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('devolve 201', () => pm.response.to.have.status(201));",
+                  "const corpo = pm.response.json();",
+                  "pm.collectionVariables.set('petId', corpo.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"nome\": \"Thor\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Shih-tzu\",\n  \"pesoKg\": 7.5,\n  \"clienteId\": {{clienteId}}\n}"},
+            "url": "{{baseUrl}}/pets"
+          }
+        },
+        {
+          "name": "Listar pets",
+          "request": {"method": "GET", "url": "{{baseUrl}}/pets"}
+        },
+        {
+          "name": "Excluir pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('devolve 204', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": {"method": "DELETE", "url": "{{baseUrl}}/pets/{{petId}}"}
+        }
+      ]
     },
     {
-      "name": "Criar agendamento",
-      "request": {
-        "method": "POST",
-        "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\n  \"clienteId\": 1,\n  \"petId\": 1,\n  \"tipoServico\": \"BANHO_E_TOSA\",\n  \"dataHora\": \"2027-01-20T14:00:00\"\n}"},
-        "url": "{{baseUrl}}/agendamentos"
-      }
-    },
-    {
-      "name": "Listar agendamentos",
-      "request": {"method": "GET", "url": "{{baseUrl}}/agendamentos"}
+      "name": "Agendamentos",
+      "item": [
+        {
+          "name": "Criar agendamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('devolve 201', () => pm.response.to.have.status(201));",
+                  "const corpo = pm.response.json();",
+                  "pm.collectionVariables.set('agendamentoId', corpo.id);",
+                  "pm.test('o servidor calculou o valor', () => pm.expect(corpo.valor).to.be.above(0));",
+                  "pm.test('nasce AGENDADO', () => pm.expect(corpo.status).to.eql('AGENDADO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"petId\": {{petId}},\n  \"tipoServico\": \"BANHO_E_TOSA\",\n  \"dataHora\": \"2027-01-20T14:00:00\"\n}"},
+            "url": "{{baseUrl}}/agendamentos"
+          }
+        },
+        {
+          "name": "Listar agendamentos",
+          "request": {"method": "GET", "url": "{{baseUrl}}/agendamentos"}
+        },
+        {
+          "name": "Concluir agendamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('devolve 200', () => pm.response.to.have.status(200));",
+                  "pm.test('fica CONCLUIDO', () => pm.expect(pm.response.json().status).to.eql('CONCLUIDO'));"
+                ]
+              }
+            }
+          ],
+          "request": {"method": "PATCH", "url": "{{baseUrl}}/agendamentos/{{agendamentoId}}/concluir"}
+        },
+        {
+          "name": "Cancelar agendamento",
+          "request": {"method": "PATCH", "url": "{{baseUrl}}/agendamentos/{{agendamentoId}}/cancelar"}
+        },
+        {
+          "name": "Criar agendamento (data no passado - 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('devolve 400', () => pm.response.to.have.status(400));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"petId\": {{petId}},\n  \"tipoServico\": \"BANHO\",\n  \"dataHora\": \"2020-01-20T14:00:00\"\n}"},
+            "url": "{{baseUrl}}/agendamentos"
+          }
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banho &amp; Tosa</title>
+    <meta name="description" content="Painel de gestão de clientes, pets e agendamentos de um pet shop.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgb(37,99,235)'%3E%3Cellipse cx='5.6' cy='10.4' rx='2.4' ry='3.1'/%3E%3Cellipse cx='10.2' cy='7.4' rx='2.4' ry='3.3'/%3E%3Cellipse cx='15.3' cy='7.7' rx='2.4' ry='3.3'/%3E%3Cellipse cx='19.6' cy='11.2' rx='2.3' ry='3'/%3E%3Cpath d='M12.4 12.4c3 0 6.2 2.6 6.2 5.5 0 2.1-1.7 3.5-3.9 3.5-1.4 0-2.2-.6-3.7-.6s-2.3.6-3.7.6c-2.2 0-3.9-1.4-3.9-3.5 0-2.9 3.2-5.5 6.2-5.5z'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar__brand">
+        <svg class="topbar__paw" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <ellipse cx="5.6" cy="10.4" rx="2.4" ry="3.1" transform="rotate(-18 5.6 10.4)"/>
+            <ellipse cx="10.2" cy="7.4" rx="2.4" ry="3.3" transform="rotate(-6 10.2 7.4)"/>
+            <ellipse cx="15.3" cy="7.7" rx="2.4" ry="3.3" transform="rotate(8 15.3 7.7)"/>
+            <ellipse cx="19.6" cy="11.2" rx="2.3" ry="3" transform="rotate(20 19.6 11.2)"/>
+            <path d="M12.4 12.4c3 0 6.2 2.6 6.2 5.5 0 2.1-1.7 3.5-3.9 3.5-1.4 0-2.2-.6-3.7-.6s-2.3.6-3.7.6c-2.2 0-3.9-1.4-3.9-3.5 0-2.9 3.2-5.5 6.2-5.5z"/>
+        </svg>
+        <span><strong>Banho</strong> &amp; Tosa</span>
+    </div>
+    <div class="topbar__right">
+        <span class="status" id="statusConexao">
+            <span class="status__dot" aria-hidden="true"></span>
+            <span class="status__label">conectando…</span>
+        </span>
+        <button class="btn btn--ghost" type="button" id="btnAjuda">Como usar</button>
+    </div>
+</header>
+
+<main class="page">
+
+    <section class="panel panel--resumo">
+        <div class="resumo">
+            <div class="resumo__principal">
+                <p class="rotulo">Faturamento previsto</p>
+                <p class="resumo__valor" id="faturamentoTotal">R$ 0,00</p>
+                <p class="resumo__nota" id="resumoNota">Nenhum agendamento registrado</p>
+            </div>
+            <dl class="resumo__contadores">
+                <div class="contador">
+                    <dt class="rotulo">Agendados</dt>
+                    <dd><span class="ponto ponto--azul"></span><span id="totalAgendados">0</span></dd>
+                </div>
+                <div class="contador">
+                    <dt class="rotulo">Concluídos</dt>
+                    <dd><span class="ponto ponto--verde"></span><span id="totalConcluidos">0</span></dd>
+                </div>
+                <div class="contador">
+                    <dt class="rotulo">Cancelados</dt>
+                    <dd><span class="ponto ponto--vermelho"></span><span id="totalCancelados">0</span></dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <div class="grid">
+
+        <div class="coluna">
+
+            <section class="panel">
+                <div class="panel__cabecalho">
+                    <h2 class="rotulo">Serviços mais agendados</h2>
+                    <span class="rotulo rotulo--suave">por valor</span>
+                </div>
+                <ul class="barras" id="barrasServicos">
+                    <li class="vazio">Sem dados ainda.</li>
+                </ul>
+            </section>
+
+            <section class="panel">
+                <div class="panel__cabecalho">
+                    <h2 class="rotulo">Agendamentos</h2>
+                    <div class="filtros" id="filtrosStatus" role="group" aria-label="Filtrar por status">
+                        <button type="button" class="chip chip--ativo" data-status="TODOS">todos</button>
+                        <button type="button" class="chip" data-status="AGENDADO">agendados</button>
+                        <button type="button" class="chip" data-status="CONCLUIDO">concluídos</button>
+                        <button type="button" class="chip" data-status="CANCELADO">cancelados</button>
+                    </div>
+                </div>
+                <div class="tabela-rolagem">
+                    <table class="tabela">
+                        <thead>
+                        <tr>
+                            <th>Pet</th>
+                            <th>Tutor</th>
+                            <th>Serviço</th>
+                            <th>Data</th>
+                            <th class="num">Valor</th>
+                            <th>Status</th>
+                            <th><span class="sr-only">Ações</span></th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabelaAgendamentos">
+                        <tr><td colspan="7" class="vazio">Nenhum agendamento ainda.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="duas-colunas">
+                <section class="panel">
+                    <div class="panel__cabecalho">
+                        <h2 class="rotulo">Clientes</h2>
+                        <span class="rotulo rotulo--suave" id="contadorClientes">0</span>
+                    </div>
+                    <div class="tabela-rolagem">
+                        <table class="tabela">
+                            <thead>
+                            <tr><th>Nome</th><th>Contato</th></tr>
+                            </thead>
+                            <tbody id="tabelaClientes">
+                            <tr><td colspan="2" class="vazio">Nenhum cliente ainda.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__cabecalho">
+                        <h2 class="rotulo">Pets</h2>
+                        <span class="rotulo rotulo--suave" id="contadorPets">0</span>
+                    </div>
+                    <div class="tabela-rolagem">
+                        <table class="tabela">
+                            <thead>
+                            <tr><th>Nome</th><th>Tutor</th><th class="num">Peso</th><th><span class="sr-only">Ações</span></th></tr>
+                            </thead>
+                            <tbody id="tabelaPets">
+                            <tr><td colspan="4" class="vazio">Nenhum pet ainda.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <aside class="coluna">
+            <section class="panel">
+                <div class="panel__cabecalho">
+                    <h2 class="rotulo">Novo registro</h2>
+                </div>
+
+                <div class="abas" role="tablist">
+                    <button type="button" class="aba aba--ativa" role="tab" data-aba="cliente">Cliente</button>
+                    <button type="button" class="aba" role="tab" data-aba="pet">Pet</button>
+                    <button type="button" class="aba" role="tab" data-aba="agendamento">Agendamento</button>
+                </div>
+
+                <form class="form" id="formCliente" data-painel="cliente">
+                    <label class="campo">
+                        <span>Nome</span>
+                        <input type="text" name="nome" required maxlength="120" placeholder="Ana Souza">
+                    </label>
+                    <label class="campo">
+                        <span>Telefone</span>
+                        <input type="text" name="telefone" required maxlength="20" placeholder="11999999999">
+                    </label>
+                    <label class="campo">
+                        <span>E-mail</span>
+                        <input type="email" name="email" required placeholder="ana@email.com">
+                    </label>
+                    <button class="btn btn--primario" type="submit">Cadastrar cliente</button>
+                </form>
+
+                <form class="form oculto" id="formPet" data-painel="pet">
+                    <label class="campo">
+                        <span>Tutor</span>
+                        <select name="clienteId" id="selectTutor" required>
+                            <option value="">Cadastre um cliente primeiro</option>
+                        </select>
+                    </label>
+                    <label class="campo">
+                        <span>Nome do pet</span>
+                        <input type="text" name="nome" required maxlength="120" placeholder="Thor">
+                    </label>
+                    <div class="campo-duplo">
+                        <label class="campo">
+                            <span>Espécie</span>
+                            <input type="text" name="especie" required maxlength="60" placeholder="Cachorro">
+                        </label>
+                        <label class="campo">
+                            <span>Peso (kg)</span>
+                            <input type="number" name="pesoKg" required min="0.1" step="0.1" placeholder="7.5">
+                        </label>
+                    </div>
+                    <label class="campo">
+                        <span>Raça <em>opcional</em></span>
+                        <input type="text" name="raca" maxlength="60" placeholder="Shih-tzu">
+                    </label>
+                    <button class="btn btn--primario" type="submit">Cadastrar pet</button>
+                </form>
+
+                <form class="form oculto" id="formAgendamento" data-painel="agendamento">
+                    <label class="campo">
+                        <span>Pet</span>
+                        <select name="petId" id="selectPet" required>
+                            <option value="">Cadastre um pet primeiro</option>
+                        </select>
+                    </label>
+                    <label class="campo">
+                        <span>Serviço</span>
+                        <select name="tipoServico" id="selectServico" required>
+                            <option value="BANHO">Banho</option>
+                            <option value="TOSA">Tosa</option>
+                            <option value="BANHO_E_TOSA" selected>Banho + Tosa</option>
+                        </select>
+                    </label>
+                    <label class="campo">
+                        <span>Data e hora</span>
+                        <input type="datetime-local" name="dataHora" id="inputDataHora" required>
+                    </label>
+                    <p class="previa" id="previaPreco">Selecione um pet para ver o valor.</p>
+                    <button class="btn btn--primario" type="submit">Criar agendamento</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel__cabecalho">
+                    <h2 class="rotulo">Tabela de preços</h2>
+                </div>
+                <table class="tabela tabela--precos">
+                    <thead>
+                    <tr><th>Serviço</th><th class="num">até 10 kg</th><th class="num">acima</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>Banho</td><td class="num">R$ 45,00</td><td class="num">R$ 60,00</td></tr>
+                    <tr><td>Tosa</td><td class="num">R$ 55,00</td><td class="num">R$ 75,00</td></tr>
+                    <tr><td>Banho + Tosa</td><td class="num">R$ 85,00</td><td class="num">R$ 115,00</td></tr>
+                    </tbody>
+                </table>
+                <p class="nota">O valor é calculado no servidor pela <code>Strategy</code> do serviço escolhido.</p>
+            </section>
+        </aside>
+    </div>
+
+    <footer class="rodape">
+        <span>Banho &amp; Tosa API — Java 25 · Spring Boot 4 · PostgreSQL</span>
+        <span class="rodape__patterns">Strategy · Factory · Facade · Singleton · Repository</span>
+    </footer>
+</main>
+
+<dialog class="dialogo" id="dialogoAjuda">
+    <h2>Como usar</h2>
+    <p>O fluxo segue a dependência entre as entidades — cada passo precisa do anterior:</p>
+    <ol>
+        <li><strong>Cadastre um cliente.</strong> Ele é o tutor responsável pelo pet.</li>
+        <li><strong>Cadastre um pet</strong> vinculado a esse tutor. O peso define a faixa de preço.</li>
+        <li><strong>Crie um agendamento</strong> escolhendo o pet, o serviço e uma data futura.</li>
+        <li><strong>Conclua ou cancele</strong> o agendamento enquanto ele estiver com status <code>AGENDADO</code>.</li>
+    </ol>
+    <p class="nota">
+        Esta página consome a mesma API REST documentada no README. O preço nunca é
+        calculado aqui: o navegador apenas exibe o valor devolvido pelo servidor.
+    </p>
+    <button class="btn btn--primario" type="button" id="btnFecharAjuda">Entendi</button>
+</dialog>
+
+<div class="avisos" id="avisos" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
+

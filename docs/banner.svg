@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-label="Banho e Tosa API - Bootcamp Santander 2026 AI Java Back-end DIO">
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1017"/>
+      <stop offset="55%" stop-color="#0a0b0e"/>
+      <stop offset="100%" stop-color="#080909"/>
+    </linearGradient>
+    <radialGradient id="brilho" cx="0.18" cy="0.12" r="0.75">
+      <stop offset="0%" stop-color="#2f6ae0" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#2f6ae0" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      .fonte { font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .kicker { font-size: 15px; font-weight: 700; letter-spacing: 2.6px; }
+      .titulo { font-size: 84px; font-weight: 700; letter-spacing: -2px; }
+      .tagline { font-size: 25px; font-weight: 400; }
+      .pill { font-size: 16px; font-weight: 500; }
+      .numero { font-size: 58px; font-weight: 600; }
+      .rodape { font-size: 15px; font-weight: 400; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="600" fill="url(#fundo)"/>
+  <rect width="1200" height="600" fill="url(#brilho)"/>
+
+  <!-- kicker -->
+  <circle cx="82" cy="84" r="4" fill="#4b8bf5"/>
+  <text class="fonte kicker" x="98" y="90" fill="#4b8bf5">BOOTCAMP SANTANDER 2026</text>
+  <text class="fonte kicker" x="404" y="90" fill="#5c6470">— AI JAVA BACK-END · DIO</text>
+
+  <!-- título -->
+  <text class="fonte titulo" x="80" y="205" fill="#f4f6fa">Banho &amp; Tosa<tspan fill="#4b8bf5"> API</tspan></text>
+
+  <text class="fonte tagline" x="80" y="266" fill="#98a1ae">Cadastro de clientes e pets, agendamento de</text>
+  <text class="fonte tagline" x="80" y="302" fill="#98a1ae">serviços e cálculo automático de preço.</text>
+
+  <text class="fonte rodape" x="80" y="358" fill="#5c6470">API REST, painel web e menu de terminal sobre a mesma Facade</text>
+
+  <!-- pills -->
+  <g>
+    <rect x="80"  y="420" width="96"  height="40" rx="20" fill="#14171d" stroke="#242830"/>
+    <text class="fonte pill" x="128" y="445" fill="#c3cad4" text-anchor="middle">Java 25</text>
+
+    <rect x="188" y="420" width="146" height="40" rx="20" fill="#14171d" stroke="#242830"/>
+    <text class="fonte pill" x="261" y="445" fill="#c3cad4" text-anchor="middle">Spring Boot 4</text>
+
+    <rect x="346" y="420" width="128" height="40" rx="20" fill="#14171d" stroke="#242830"/>
+    <text class="fonte pill" x="410" y="445" fill="#c3cad4" text-anchor="middle">PostgreSQL</text>
+
+    <rect x="486" y="420" width="172" height="40" rx="20" fill="#152233" stroke="#2b4470"/>
+    <text class="fonte pill" x="572" y="445" fill="#7fa9f2" text-anchor="middle">Design Patterns</text>
+
+    <rect x="670" y="420" width="120" height="40" rx="20" fill="#14171d" stroke="#242830"/>
+    <text class="fonte pill" x="730" y="445" fill="#c3cad4" text-anchor="middle">Web + CLI</text>
+
+    <rect x="802" y="420" width="104" height="40" rx="20" fill="#14171d" stroke="#242830"/>
+    <text class="fonte pill" x="854" y="445" fill="#c3cad4" text-anchor="middle">Docker</text>
+  </g>
+
+  <!-- contador de testes -->
+  <text class="fonte numero" x="1120" y="452" fill="#f4f6fa" text-anchor="end">46</text>
+  <text class="fonte rodape" x="1120" y="480" fill="#98a1ae" text-anchor="end">testes automatizados</text>
+  <text class="fonte rodape" x="1120" y="504" fill="#5c6470" text-anchor="end">0 falhas</text>
+</svg>
