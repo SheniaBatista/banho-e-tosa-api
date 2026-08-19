@@ -1,607 +1,184 @@
-# Banho & Tosa API
+# 🐾 Banho & Tosa API
 
-API REST para gerenciamento de clientes, pets e agendamentos de serviços de banho e tosa, desenvolvida com Java e Spring Boot.
+API REST para gerenciamento de clientes, pets e agendamentos de um pet shop, desenvolvida com Java e Spring Boot como aplicação prática de **Padrões de Projeto (Design Patterns)**.
 
-A aplicação permite cadastrar clientes e seus pets, criar agendamentos, calcular automaticamente o preço do serviço escolhido e controlar o ciclo de vida de cada atendimento.
+O projeto utiliza Strategy, Factory, Facade e Repository para organizar responsabilidades, reduzir acoplamento e manter as regras de negócio separadas da camada HTTP.
 
-Além das operações REST, o projeto aplica padrões de projeto para separar responsabilidades e evitar que regras de negócio fiquem concentradas nos controllers.
+## Objetivo do desafio
 
-O fluxo principal da aplicação é:
+O projeto foi desenvolvido como entrega prática de um desafio sobre Padrões de Projeto com Java e Spring.
 
-```text
-Requisição HTTP
-      ↓
-Controller
-      ↓
-Facade
-      ↓
-Regras de negócio
-      ↓
-Repository
-      ↓
-PostgreSQL
-```
+A proposta é aplicar padrões de projeto em um cenário realista e de fácil compreensão, demonstrando como diferentes responsabilidades podem ser distribuídas entre os componentes da aplicação.
 
-Para o cálculo dos serviços, a aplicação utiliza Strategy e Factory, permitindo que cada tipo de serviço possua sua própria regra de preço.
-
----
-
-## Desafio DIO
-
-Projeto desenvolvido como parte de um desafio prático da Digital Innovation One (DIO), com o objetivo de aplicar conceitos de desenvolvimento back-end com Java, Spring Boot e padrões de projeto.
-
-A implementação evolui o exercício para uma API REST persistida em PostgreSQL, com validação de dados, relacionamentos entre entidades, tratamento global de erros e configuração de credenciais por variáveis de ambiente.
-
----
-
-## Arquitetura
-
-O projeto organiza as responsabilidades nos seguintes componentes:
-
-```text
-Controller
-    ↓
-Facade
-    ↓
-Repository
-    ↓
-PostgreSQL
-```
-
-O cálculo de preços segue um fluxo separado:
-
-```text
-AgendamentoFacade
-        ↓
-PrecoServicoFactory
-        ↓
-PrecoServicoStrategy
-        ↓
-┌─────────────┬─────────────┬──────────────────────┐
-│    BANHO    │    TOSA     │    BANHO_E_TOSA     │
-│             │             │                      │
-│ BanhoPreco  │ TosaPreco   │ BanhoETosaPreco     │
-│ Strategy    │ Strategy    │ Strategy             │
-└─────────────┴─────────────┴──────────────────────┘
-```
-
-### Facade
-
-`AgendamentoFacade` centraliza o fluxo principal da aplicação.
-
-Controllers recebem as requisições HTTP e delegam as operações para a facade, que coordena acesso aos repositories, validações e cálculo de preços.
-
-Ao criar um agendamento, por exemplo, o fluxo é:
-
-```text
-clienteId
-    ↓
-Buscar cliente
-
-petId
-    ↓
-Buscar pet
-
-    ↓
-Verificar se o pet pertence ao cliente
-
-    ↓
-Selecionar estratégia do serviço
-
-    ↓
-Calcular preço
-
-    ↓
-Criar agendamento com status AGENDADO
-
-    ↓
-Persistir no PostgreSQL
-```
-
-### Strategy
-
-O cálculo de preço foi separado através do padrão Strategy.
-
-O contrato comum é definido por:
-
-```text
-PrecoServicoStrategy
-```
-
-e possui implementações específicas:
-
-```text
-BanhoPrecoStrategy
-TosaPrecoStrategy
-BanhoETosaPrecoStrategy
-```
-
-Cada estratégia conhece somente a regra de cálculo correspondente ao seu serviço.
-
-Isso evita estruturas condicionais extensas dentro da regra de agendamento e permite adicionar novas formas de cálculo sem alterar as estratégias existentes.
-
-### Factory
-
-`PrecoServicoFactory` é responsável por localizar a Strategy correspondente ao `TipoServico` solicitado.
-
-As implementações de `PrecoServicoStrategy` são gerenciadas pelo Spring e organizadas pela Factory utilizando um `EnumMap`.
-
-Assim, a facade não precisa conhecer qual classe concreta realiza cada cálculo.
-
-### Repository
-
-A persistência utiliza Spring Data JPA.
-
-Existem repositories específicos para as principais entidades:
-
-```text
-ClienteRepository
-PetRepository
-AgendamentoRepository
-```
-
-O Hibernate realiza o mapeamento objeto-relacional e o PostgreSQL é utilizado como banco de dados.
-
----
+O fluxo principal permite cadastrar clientes e seus pets, criar agendamentos e calcular automaticamente o preço do atendimento de acordo com o serviço escolhido e o peso do animal.
 
 ## Tecnologias
 
-| Camada | Tecnologia |
-|---|---|
-| Linguagem | Java 25 |
-| Framework | Spring Boot 4.1.0 |
-| API | Spring Web |
-| Validação | Bean Validation |
-| Persistência | Spring Data JPA |
-| ORM | Hibernate |
-| Banco de dados | PostgreSQL |
-| Pool de conexões | HikariCP |
-| Build | Maven |
-| Testes | JUnit |
-| Teste manual da API | Postman |
+- Java 25
+- Spring Boot 4.1.0
+- Spring Web
+- Spring Data JPA
+- Bean Validation
+- PostgreSQL
+- Hibernate
+- Maven
 
----
+## Padrões de projeto aplicados
 
-## Funcionalidades
+### Strategy
 
-### Clientes
+O cálculo do preço varia de acordo com o serviço escolhido.
 
-- Cadastrar cliente
-- Listar clientes
+Para evitar concentrar essa lógica em uma sequência de condicionais, cada tipo de serviço possui sua própria estratégia:
 
-### Pets
+- `BanhoPrecoStrategy`
+- `TosaPrecoStrategy`
+- `BanhoETosaPrecoStrategy`
 
-- Cadastrar pet associado a um cliente
-- Listar pets
-- Excluir pet
+Todas implementam a interface:
 
-### Agendamentos
+```java
+PrecoServicoStrategy
+```
 
-- Criar agendamento
-- Associar cliente e pet
-- Escolher o tipo de serviço
-- Calcular o valor automaticamente
-- Listar agendamentos
-- Concluir agendamento
-- Cancelar agendamento
+Dessa forma, novas formas de cálculo podem ser adicionadas sem concentrar todas as regras em uma única classe.
 
----
+### Factory
+
+A classe `PrecoServicoFactory` é responsável por selecionar a estratégia adequada de acordo com o `TipoServico`.
+
+Assim, quem solicita o cálculo não precisa conhecer diretamente qual implementação de `PrecoServicoStrategy` deve ser utilizada.
+
+### Facade
+
+A classe `AgendamentoFacade` centraliza o fluxo necessário para realizar as operações relacionadas aos agendamentos.
+
+Ao criar um novo agendamento, ela coordena etapas como:
+
+1. Buscar o cliente.
+2. Buscar o pet.
+3. Verificar se o pet pertence ao cliente informado.
+4. Selecionar a estratégia correspondente ao serviço.
+5. Calcular o valor do atendimento.
+6. Persistir o agendamento.
+
+Com isso, o controller permanece responsável pela camada HTTP sem precisar conhecer todos os detalhes das regras de negócio.
+
+### Singleton no contexto do Spring
+
+Os componentes gerenciados pelo Spring utilizam, por padrão, escopo singleton.
+
+Dessa forma, classes como `AgendamentoFacade` e as implementações de `PrecoServicoStrategy` têm suas instâncias criadas e administradas pelo container de Inversão de Controle do Spring.
+
+Neste projeto, portanto, o padrão não é implementado manualmente com construtores privados ou métodos estáticos. O ciclo de vida das instâncias fica sob responsabilidade do framework.
+
+### Repository
+
+Além dos padrões trabalhados no desafio, o projeto utiliza Repository para abstrair o acesso aos dados.
+
+As interfaces:
+
+- `ClienteRepository`
+- `PetRepository`
+- `AgendamentoRepository`
+
+estendem `JpaRepository`, permitindo utilizar a abstração fornecida pelo Spring Data JPA para persistência e consulta das entidades.
+
+## Fluxo da aplicação
+
+```text
+Requisição HTTP
+      │
+      ▼
+  Controller
+      │
+      ▼
+    Facade
+   ┌──┴───────────────┐
+   ▼                  ▼
+Repository     Factory / Strategy
+   │                  │
+   ▼                  ▼
+PostgreSQL      Regra de preço
+```
+
+Os controllers recebem as requisições HTTP, enquanto a `AgendamentoFacade` coordena as regras relacionadas aos agendamentos.
+
+A escolha e o cálculo do preço são delegados à Factory e às Strategies, enquanto os repositories concentram o acesso aos dados persistidos no PostgreSQL.
+
+## Estrutura principal
+
+```text
+src/main/java/com/portfolio/banhoetosa/
+│
+├── BanhoETosaApiApplication.java
+│
+├── controller/
+│   ├── AgendamentoController.java
+│   ├── ClienteController.java
+│   └── PetController.java
+│
+├── dto/
+│   ├── AgendamentoRequest.java
+│   └── PetRequest.java
+│
+├── exception/
+│   ├── ApiError.java
+│   ├── GlobalExceptionHandler.java
+│   ├── RecursoNaoEncontradoException.java
+│   └── RegraNegocioException.java
+│
+├── facade/
+│   └── AgendamentoFacade.java
+│
+├── model/
+│   ├── Agendamento.java
+│   ├── Cliente.java
+│   ├── Pet.java
+│   ├── StatusAgendamento.java
+│   └── TipoServico.java
+│
+├── repository/
+│   ├── AgendamentoRepository.java
+│   ├── ClienteRepository.java
+│   └── PetRepository.java
+│
+└── strategy/
+    ├── BanhoETosaPrecoStrategy.java
+    ├── BanhoPrecoStrategy.java
+    ├── PrecoServicoFactory.java
+    ├── PrecoServicoStrategy.java
+    └── TosaPrecoStrategy.java
+```
+
+## Regras implementadas
+
+- O cliente deve ser cadastrado antes do pet.
+- O pet deve estar associado a um cliente existente.
+- Um serviço só pode ser agendado pelo cliente associado ao pet.
+- A data e hora do agendamento devem estar no futuro.
+- O preço é calculado automaticamente de acordo com o serviço e o peso do pet.
+- Um agendamento só pode ser concluído ou cancelado enquanto estiver com status `AGENDADO`.
+
+## Preços utilizados
+
+| Serviço | Pet até 10 kg | Pet acima de 10 kg |
+|---|---:|---:|
+| Banho | R$ 45,00 | R$ 60,00 |
+| Tosa | R$ 55,00 | R$ 75,00 |
+| Banho + Tosa | R$ 85,00 | R$ 115,00 |
 
 ## API REST
 
 ### Clientes
 
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `POST` | `/clientes` | Cadastra um cliente |
-| `GET` | `/clientes` | Lista os clientes |
-
-### Pets
-
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `POST` | `/pets` | Cadastra um pet |
-| `GET` | `/pets` | Lista os pets |
-| `DELETE` | `/pets/{id}` | Exclui um pet |
-
-### Agendamentos
-
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `POST` | `/agendamentos` | Cria um agendamento |
-| `GET` | `/agendamentos` | Lista os agendamentos |
-| `PATCH` | `/agendamentos/{id}/concluir` | Marca um agendamento como concluído |
-| `PATCH` | `/agendamentos/{id}/cancelar` | Cancela um agendamento |
-
----
-
-## Regras de negócio
-
-A aplicação implementa regras para preservar a consistência dos agendamentos.
-
-### Associação entre cliente e pet
-
-Um agendamento só pode ser criado quando o pet informado pertence ao cliente selecionado.
-
-Caso contrário, a operação é rejeitada.
-
-### Data do agendamento
-
-A data e hora do agendamento devem estar no futuro.
-
-A validação é realizada no DTO de entrada utilizando Bean Validation.
-
-### Cálculo do preço
-
-O cliente da API não informa diretamente o valor final do serviço.
-
-O preço é calculado pela aplicação através da Strategy correspondente ao tipo de serviço selecionado.
-
-```text
-TipoServico
-     ↓
-PrecoServicoFactory
-     ↓
-Strategy correspondente
-     ↓
-Valor calculado
-```
-
-### Status inicial
-
-Todo novo agendamento é criado com:
-
-```text
-AGENDADO
-```
-
-### Conclusão
-
-Somente um agendamento com status `AGENDADO` pode ser concluído.
-
-A operação altera o status para:
-
-```text
-CONCLUIDO
-```
-
-### Cancelamento
-
-Somente um agendamento com status `AGENDADO` pode ser cancelado.
-
-A operação altera o status para:
-
-```text
-CANCELADO
-```
-
----
-
-## Modelo de dados
-
-A aplicação possui três entidades principais:
-
-```text
-Cliente
-   │
-   └── Pet
-
-Cliente ─────────┐
-                 │
-Pet ─────────────┴── Agendamento
-```
-
-### Cliente
-
-Representa o tutor responsável pelos pets.
-
-Principais informações:
-
-```text
-id
-nome
-telefone
-email
-```
-
-### Pet
-
-Representa um animal associado a um cliente.
-
-Principais informações:
-
-```text
-id
-nome
-especie
-raca
-pesoKg
-cliente
-```
-
-### Agendamento
-
-Representa a contratação de um serviço para determinado pet.
-
-Principais informações:
-
-```text
-id
-cliente
-pet
-dataHora
-tipoServico
-status
-valor
-```
-
-Os relacionamentos são persistidos através de chaves estrangeiras no PostgreSQL.
-
----
-
-## Tipos de serviço
-
-Os serviços disponíveis são representados pelo enum `TipoServico`:
-
-```text
-BANHO
-TOSA
-BANHO_E_TOSA
-```
-
-Cada opção possui uma Strategy responsável pelo cálculo do preço.
-
----
-
-## Status do agendamento
-
-O ciclo de vida é representado pelo enum `StatusAgendamento`:
-
-```text
-AGENDADO
-CONCLUIDO
-CANCELADO
-```
-
-O fluxo permitido é:
-
-```text
-                  ┌──▶ CONCLUIDO
-                  │
-AGENDADO ─────────┤
-                  │
-                  └──▶ CANCELADO
-```
-
-Depois de concluído ou cancelado, o agendamento não pode passar novamente pelas operações de conclusão ou cancelamento.
-
----
-
-## Tratamento de erros
-
-A API utiliza um `GlobalExceptionHandler` com `@RestControllerAdvice` para centralizar o tratamento das exceções.
-
-Entre os cenários tratados estão:
-
-| Situação | HTTP |
-|---|---:|
-| Recurso não encontrado | `404 Not Found` |
-| Violação de regra de negócio | `400 Bad Request` |
-| Argumento inválido | `400 Bad Request` |
-| Falha de validação dos dados | `400 Bad Request` |
-
-Os erros são devolvidos utilizando uma estrutura padronizada:
-
-```json
-{
-  "timestamp": "2026-08-19T12:00:00",
-  "status": 400,
-  "erro": "Bad Request",
-  "mensagem": "Descrição do problema"
-}
-```
-
-Isso evita retornar stack traces diretamente para quem consome a API e mantém o formato das respostas de erro consistente.
-
----
-
-## Estrutura do projeto
-
-```text
-src/
-├── main/
-│   ├── java/com/portfolio/banhoetosa/
-│   │   │
-│   │   ├── BanhoETosaApiApplication.java
-│   │   │
-│   │   ├── controller/
-│   │   │   ├── AgendamentoController.java
-│   │   │   ├── ClienteController.java
-│   │   │   └── PetController.java
-│   │   │
-│   │   ├── dto/
-│   │   │   ├── AgendamentoRequest.java
-│   │   │   └── PetRequest.java
-│   │   │
-│   │   ├── exception/
-│   │   │   ├── ApiError.java
-│   │   │   ├── GlobalExceptionHandler.java
-│   │   │   ├── RecursoNaoEncontradoException.java
-│   │   │   └── RegraNegocioException.java
-│   │   │
-│   │   ├── facade/
-│   │   │   └── AgendamentoFacade.java
-│   │   │
-│   │   ├── model/
-│   │   │   ├── Agendamento.java
-│   │   │   ├── Cliente.java
-│   │   │   ├── Pet.java
-│   │   │   ├── StatusAgendamento.java
-│   │   │   └── TipoServico.java
-│   │   │
-│   │   ├── repository/
-│   │   │   ├── AgendamentoRepository.java
-│   │   │   ├── ClienteRepository.java
-│   │   │   └── PetRepository.java
-│   │   │
-│   │   └── strategy/
-│   │       ├── BanhoPrecoStrategy.java
-│   │       ├── TosaPrecoStrategy.java
-│   │       ├── BanhoETosaPrecoStrategy.java
-│   │       ├── PrecoServicoFactory.java
-│   │       └── PrecoServicoStrategy.java
-│   │
-│   └── resources/
-│       └── application.properties
-│
-└── test/
-    └── java/com/portfolio/banhoetosa/
-        └── BanhoETosaApiApplicationTests.java
-
-postman/
-└── Banho-e-Tosa.postman_collection.json
-```
-
----
-
-## Como executar
-
-### Requisitos
-
-Para executar o projeto localmente:
-
-| Item | Requisito |
-|---|---|
-| JDK | 25 |
-| PostgreSQL | instalado e em execução |
-| Maven | compatível com o projeto |
-| Cliente HTTP | Postman ou equivalente |
-
----
-
-### 1. Criar o banco de dados
-
-No PostgreSQL, crie o banco:
-
-```sql
-CREATE DATABASE banho_e_tosa;
-```
-
-Crie ou utilize um usuário com permissão para acessar esse banco.
-
-As credenciais não ficam armazenadas no código-fonte.
-
----
-
-### 2. Configurar as variáveis de ambiente
-
-A aplicação espera duas variáveis:
-
-```text
-DB_USERNAME
-DB_PASSWORD
-```
-
-No Windows PowerShell, por exemplo:
-
-```powershell
-$env:DB_USERNAME="seu_usuario"
-$env:DB_PASSWORD="sua_senha"
-```
-
-As variáveis definidas dessa maneira são válidas para a sessão atual do terminal.
-
-No IntelliJ IDEA, elas também podem ser configuradas nas Environment Variables da Run Configuration.
-
-Não coloque a senha diretamente no `application.properties`.
-
----
-
-### 3. Configuração da aplicação
-
-O datasource utiliza:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/banho_e_tosa
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
-```
-
-O Hibernate está configurado para atualizar o schema durante o desenvolvimento:
-
-```properties
-spring.jpa.hibernate.ddl-auto=update
-```
-
-Ao iniciar a aplicação, as tabelas necessárias são criadas ou atualizadas a partir das entidades JPA.
-
----
-
-### 4. Executar
-
-Pelo IntelliJ IDEA, execute:
-
-```text
-BanhoETosaApiApplication
-```
-
-Ou utilize Maven pelo terminal conforme a configuração disponível no ambiente:
-
-```bash
-mvn spring-boot:run
-```
-
-Quando a inicialização for concluída, a API estará disponível em:
-
-```text
-http://localhost:8080
-```
-
-Um log semelhante a este indica que a aplicação iniciou corretamente:
-
-```text
-Tomcat started on port 8080
-Started BanhoETosaApiApplication
-```
-
----
-
-## Testando com Postman
-
-O projeto contém uma collection em:
-
-```text
-postman/Banho-e-Tosa.postman_collection.json
-```
-
-Ela pode ser importada diretamente no Postman para testar os endpoints da aplicação.
-
-Um fluxo típico de teste é:
-
-```text
-1. Cadastrar cliente
-        ↓
-2. Cadastrar pet para o cliente
-        ↓
-3. Criar agendamento
-        ↓
-4. Listar agendamentos
-        ↓
-5. Concluir ou cancelar
-```
-
----
-
-## Exemplos de requisições
-
-### Cadastrar cliente
+#### Cadastrar cliente
 
 ```http
 POST /clientes
-Content-Type: application/json
 ```
 
-Exemplo de corpo:
+Exemplo:
 
 ```json
 {
@@ -611,36 +188,44 @@ Exemplo de corpo:
 }
 ```
 
----
+#### Listar clientes
 
-### Cadastrar pet
+```http
+GET /clientes
+```
+
+### Pets
+
+#### Cadastrar pet
 
 ```http
 POST /pets
-Content-Type: application/json
 ```
 
 Exemplo:
 
 ```json
 {
-  "nome": "Mel",
+  "nome": "Thor",
   "especie": "Cachorro",
-  "raca": "Golden Retriever",
-  "pesoKg": 25.0,
+  "raca": "Shih-tzu",
+  "pesoKg": 7.5,
   "clienteId": 1
 }
 ```
 
-O `clienteId` determina quem é o tutor do pet.
+#### Listar pets
 
----
+```http
+GET /pets
+```
 
-### Criar agendamento
+### Agendamentos
+
+#### Criar agendamento
 
 ```http
 POST /agendamentos
-Content-Type: application/json
 ```
 
 Exemplo:
@@ -649,142 +234,133 @@ Exemplo:
 {
   "clienteId": 1,
   "petId": 1,
-  "dataHora": "2026-12-10T14:00:00",
-  "tipoServico": "BANHO"
+  "tipoServico": "BANHO_E_TOSA",
+  "dataHora": "2027-01-20T14:00:00"
 }
 ```
 
-O valor do serviço não precisa ser enviado: ele é calculado automaticamente pela aplicação.
+Tipos de serviço aceitos:
 
----
-
-### Listar clientes
-
-```http
-GET /clientes
+```text
+BANHO
+TOSA
+BANHO_E_TOSA
 ```
 
-### Listar pets
+O valor do atendimento é calculado automaticamente pela aplicação.
 
-```http
-GET /pets
-```
-
-### Listar agendamentos
+#### Listar agendamentos
 
 ```http
 GET /agendamentos
 ```
 
-### Concluir agendamento
+#### Concluir agendamento
 
 ```http
-PATCH /agendamentos/1/concluir
+PATCH /agendamentos/{id}/concluir
 ```
 
-### Cancelar agendamento
+#### Cancelar agendamento
 
 ```http
-PATCH /agendamentos/1/cancelar
+PATCH /agendamentos/{id}/cancelar
 ```
 
-### Excluir pet
+## Como executar
 
-```http
-DELETE /pets/1
+### Pré-requisitos
+
+- JDK 25
+- Maven
+- PostgreSQL
+
+### 1. Criar o banco de dados
+
+Com o PostgreSQL em execução, crie o banco utilizado pela aplicação:
+
+```sql
+CREATE DATABASE banho_e_tosa;
 ```
 
----
+### 2. Configurar o acesso ao PostgreSQL
 
+A aplicação recebe o usuário e a senha do banco através das variáveis de ambiente `DB_USERNAME` e `DB_PASSWORD`.
 
-## Testes
+No Windows PowerShell:
 
-Atualmente o projeto possui um teste de contexto com `@SpringBootTest`, responsável por verificar a inicialização do contexto Spring.
+```powershell
+$env:DB_USERNAME="seu_usuario"
+$env:DB_PASSWORD="sua_senha"
+```
+
+As variáveis configuradas dessa forma ficam disponíveis durante a sessão atual do terminal.
+
+O arquivo `application.properties` utiliza essas variáveis na configuração do datasource.
+
+### 3. Executar a aplicação
+
+Na raiz do projeto:
+
+```bash
+mvn spring-boot:run
+```
+
+A API ficará disponível em:
 
 ```text
-BanhoETosaApiApplicationTests
-└── contextLoads()
+http://localhost:8080
 ```
 
-Os fluxos da API também podem ser testados manualmente através da collection Postman incluída no projeto.
+O Hibernate cria e atualiza as tabelas necessárias através da configuração:
 
-Uma evolução futura é ampliar a cobertura automatizada das regras de negócio, especialmente cálculo de preços, criação de agendamentos e transições de status.
+```properties
+spring.jpa.hibernate.ddl-auto=update
+```
 
----
+## Testando com Postman
 
-## Decisões de projeto
+O diretório `postman/` contém uma collection pronta para importar no Postman e testar as principais operações da API.
 
-### Por que Strategy para os preços?
-
-As regras de preço variam conforme o serviço.
-
-Colocar todos os cálculos em uma única classe exigiria condicionais para descobrir qual regra executar. Com Strategy, cada serviço possui uma implementação independente.
-
-A aplicação trabalha contra o contrato:
+Um fluxo de teste pode ser realizado nesta ordem:
 
 ```text
-PrecoServicoStrategy
+1. Cadastrar cliente
+        ↓
+2. Cadastrar pet
+        ↓
+3. Criar agendamento
+        ↓
+4. Listar agendamentos
+        ↓
+5. Concluir ou cancelar agendamento
 ```
 
-e não precisa concentrar todas as regras em um único método.
+Como o pet depende de um cliente e o agendamento depende de ambos, essa sequência também representa o fluxo básico das entidades da aplicação.
 
-### Por que uma Factory?
+## Tratamento de erros
 
-Mesmo com Strategy, algum componente precisa escolher qual implementação será usada.
+A aplicação possui tratamento centralizado de exceções através de `GlobalExceptionHandler`.
 
-Essa responsabilidade fica em `PrecoServicoFactory`, que associa cada `TipoServico` à Strategy correspondente.
+Entre as situações tratadas estão:
 
-Assim, a facade solicita a estratégia adequada sem precisar instanciar ou selecionar manualmente classes concretas.
+- recurso não encontrado;
+- violações das regras de negócio;
+- dados inválidos enviados nas requisições.
 
-### Por que uma Facade?
+As respostas de erro são representadas pelo objeto `ApiError`, evitando que detalhes internos da aplicação sejam retornados diretamente ao cliente.
 
-Criar um agendamento envolve mais do que salvar uma entidade.
+## Possíveis evoluções
 
-É necessário localizar cliente e pet, verificar a relação entre eles, selecionar uma regra de preço, calcular o valor, definir o status inicial e persistir o resultado.
+- Autenticação de usuários.
+- Cadastro de funcionários.
+- Controle de horários disponíveis.
+- Histórico de atendimentos.
+- Documentação interativa com Swagger/OpenAPI.
+- Ampliação da cobertura de testes.
+- Migrations do banco de dados com Flyway.
+- Containerização da aplicação e do PostgreSQL com Docker.
 
-A facade oferece uma entrada única para esse fluxo e impede que os controllers acumulem regras de negócio.
+## Autoria
 
-### Por que variáveis de ambiente?
-
-Usuário e senha do banco são configurações do ambiente onde a aplicação executa, não características do código.
-
-Por isso o repositório mantém apenas os nomes:
-
-```text
-DB_USERNAME
-DB_PASSWORD
-```
-
-e cada ambiente fornece seus próprios valores.
-
----
-
-## Aprendizados
-
-O projeto permitiu aplicar conceitos que aparecem em conjunto em aplicações Spring reais: API REST, injeção de dependências, persistência com JPA, relacionamentos entre entidades, validação, tratamento de exceções e integração com PostgreSQL.
-
-A aplicação de Strategy deixou mais clara a diferença entre apenas criar classes com nomes de padrões e realmente distribuir responsabilidades. Cada cálculo de serviço pode evoluir de forma independente, enquanto a Factory concentra a seleção da implementação adequada.
-
-
----
-
-## Melhorias futuras
-
-Algumas evoluções possíveis para o projeto:
-
-- ampliar a suíte de testes automatizados;
-- criar DTOs específicos para respostas da API;
-- adicionar atualização de clientes e pets;
-- permitir consulta de pets por tutor;
-- adicionar filtros de agendamento por data e status;
-- impedir conflitos de horário;
-- adicionar documentação interativa com OpenAPI/Swagger;
-- utilizar migrations com Flyway em vez de depender de `ddl-auto=update`;
-- adicionar autenticação e autorização;
-- containerizar aplicação e PostgreSQL com Docker Compose.
-
----
-
-## Licença
-
-Projeto educacional desenvolvido para concluir a formação no Bootcamp Santander 2026 — AI Java Back-end, oferecido pela [Digital Innovation One.](https://www.dio.me/)
+Projeto desenvolvido para fins educacionais e de portfólio como entrega prática de um desafio de **Padrões de Projeto com Java e Spring**.
