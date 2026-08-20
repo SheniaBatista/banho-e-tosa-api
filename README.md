@@ -415,6 +415,4 @@ Distribuído sob a licença [MIT](LICENSE).
 
 ## Autoria
 
-Projeto desenvolvido por **Shenia Batista** para fins educacionais e de portfólio, como
-entrega prática do desafio de Padrões de Projeto com Java e Spring, do Bootcamp Santander 2026
-na trilha AI Java Back-end (DIO).
+Projeto educacional desenvolvido para concluir a formação no Bootcamp Santander 2026 — AI Java Back-end, oferecido pela [Digital Innovation One](https://www.dio.me/).
