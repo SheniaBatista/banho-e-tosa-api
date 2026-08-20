@@ -415,6 +415,6 @@ Distribuído sob a licença [MIT](LICENSE).
 
 ## Autoria
 
-Projeto desenvolvido por **Shênia Batista** para fins educacionais e de portfólio, como
+Projeto desenvolvido por **Shenia Batista** para fins educacionais e de portfólio, como
 entrega prática do desafio de Padrões de Projeto com Java e Spring, do Bootcamp Santander 2026
 na trilha AI Java Back-end (DIO).
