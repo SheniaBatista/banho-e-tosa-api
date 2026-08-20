@@ -413,6 +413,4 @@ src/main/resources/
 
 Distribuído sob a licença [MIT](LICENSE).
 
-## Autoria
-
 Projeto educacional desenvolvido para concluir a formação no Bootcamp Santander 2026 — AI Java Back-end, oferecido pela [Digital Innovation One](https://www.dio.me/).
